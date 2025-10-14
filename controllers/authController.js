@@ -78,7 +78,7 @@ exports.forgotpassword = catchAsync(async (req, res, next) => {
 
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
-  const url = '#';
+  const url = `https://coach-x.vercel.app/reset-password/${resetToken}`;
 
   await new Email(user, url).sendPasswordResetEmail();
 
