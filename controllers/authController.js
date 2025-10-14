@@ -5,12 +5,14 @@ const AppError = require('../utils/appError');
 const { promisify } = require('util');
 const crypto = require('crypto');
 const { use } = require('../app');
+const Email = require('../utils/email');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_TOKEN_SECRET, {
     expiresIn: process.env.EXPIRES_IN,
   });
 };
+
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     fullName: req.body.fullName,
@@ -25,13 +27,16 @@ exports.signup = catchAsync(async (req, res, next) => {
   await newUser.save({ validateBeforeSave: false });
 
   const token = signToken(newUser.id);
+  const url = `https://coach-x.vercel.app/verify-email/${emailVerificationToken}`;
 
   newUser.password = undefined;
+
+  //send email
+  await new Email(newUser, url).sendWelcomeEmail();
 
   res.status(201).json({
     status: 'success',
     token,
-    emailToken: emailVerificationToken,
     data: {
       user: newUser,
     },
@@ -73,13 +78,13 @@ exports.forgotpassword = catchAsync(async (req, res, next) => {
 
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
+  const url = '#';
+
+  await new Email(user, url).sendPasswordResetEmail();
 
   res.status(200).json({
     status: 'success',
     message: 'Token sent to mail',
-    resetUrl: `${req.protocol}://${req.get(
-      'host'
-    )}/api/v1/users/resetpassword/${resetToken}`,
   });
 });
 

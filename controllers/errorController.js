@@ -27,6 +27,7 @@ const sendErrorProd = (err, req, res) => {
     status: 'error',
     message: 'something went very wrong',
   });
+  console.log('ERROR ❌❌', err);
 };
 
 exports.globalErrorhandler = (err, req, res, next) => {
