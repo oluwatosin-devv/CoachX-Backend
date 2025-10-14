@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;600;700&display=swap');
+
+:root {
+  --verify-email-bg: #fff2e9; /* soft background */
+  --verify-email-card-bg: #ffffff;
+  --verify-email-border: #ffd5b0;
+  --verify-email-text: #5f5650;
+  --verify-email-btn-bg: #ff8a2b;
+  --verify-email-btn-text: #ffffff;
+  --verify-email-btn-focus: #ff7a1f;
+}
+
+body {
+  background-color: var(--verify-email-bg);
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--verify-email-text);
+
+  /* Center content vertically and horizontally */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.email-container {
+  max-width: 600px;
+  width: 90%;
+  background-color: var(--verify-email-card-bg);
+  border: 1px solid var(--verify-email-border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.email-header {
+  text-align: center;
+  background-color: var(--verify-email-bg);
+  padding: 20px;
+}
+
+.email-header img {
+  width: 120px;
+  height: auto;
+}
+
+.email-body {
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.email-body h2 {
+  color: #5b514a;
+  margin-bottom: 15px;
+}
+
+.email-body p {
+  line-height: 1.6;
+  font-size: 15px;
+  margin-bottom: 25px;
+}
+
+.verify-btn {
+  background-color: var(--verify-email-btn-bg);
+  color: var(--verify-email-btn-text);
+  text-decoration: none;
+  padding: 14px 28px;
+  border-radius: 6px;
+  font-weight: bold;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+}
+
+.verify-btn:hover {
+  background-color: var(--verify-email-btn-focus);
+}
+
+.email-footer {
+  text-align: center;
+  padding: 15px;
+  font-size: 13px;
+  color: #7a7a7a;
+  border-top: 1px solid var(--verify-email-border);
+  background-color: var(--verify-email-card-bg);
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 20px;
+    align-items: center;
+  }
+
+  .email-container {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .email-body {
+    padding: 20px 15px;
+  }
+
+  .verify-btn {
+    width: 80%;
+    padding: 12px;
+  }
+}

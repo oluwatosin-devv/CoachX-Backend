@@ -59,6 +59,8 @@ const userSchema = new mongoose.Schema(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    emailVerificationToken: String,
+    emailVerificationExpiresIn: Date,
 
     is_active: {
       type: Boolean,
@@ -99,6 +101,17 @@ userSchema.methods.correctPassword = async function (
   return await bcrypt.compare(userPassword, hashedPassword);
 };
 
+userSchema.methods.passwordChangedAfter = function (JWTtimestamp) {
+  if (this.passwordChangedAt) {
+    const changedtimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+
+    return JWTtimestamp < changedtimestamp;
+  }
+};
+
 userSchema.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
@@ -111,5 +124,19 @@ userSchema.methods.createPasswordResetToken = function () {
 
   return resetToken;
 };
+
+userSchema.methods.createEmailVerificationToken = function () {
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+
+  this.emailVerificationToken = crypto
+    .createHash('sha256')
+    .update(verificationToken)
+    .digest('hex');
+
+  this.emailVerificationExpiresIn = Date.now() + 30 * 24 * 60 * 60 * 1000;
+
+  return verificationToken;
+};
+
 const User = mongoose.model('User', userSchema);
 module.exports = User;

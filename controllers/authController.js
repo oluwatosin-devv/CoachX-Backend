@@ -2,7 +2,9 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const { promisify } = require('util');
 const crypto = require('crypto');
+const { use } = require('../app');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_TOKEN_SECRET, {
@@ -18,6 +20,10 @@ exports.signup = catchAsync(async (req, res, next) => {
     role: req.body.role || 'user',
   });
 
+  //create email verification token
+  const emailVerificationToken = newUser.createEmailVerificationToken();
+  await newUser.save({ validateBeforeSave: false });
+
   const token = signToken(newUser.id);
 
   newUser.password = undefined;
@@ -25,6 +31,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: 'success',
     token,
+    emailToken: emailVerificationToken,
     data: {
       user: newUser,
     },
@@ -88,7 +95,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     passwordResetExpires: { $gt: Date.now() },
   }).select('+password');
 
-  if (!user) return next(new AppError('Token is invalid or has expired !!'));
+  if (!user)
+    return next(new AppError('Token is invalid or has expired !!', 401));
 
   //Make sure password is not same as old password
 
@@ -110,4 +118,64 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     token,
     message: 'Password Changed Successfully',
   });
+});
+
+exports.verifyEmail = catchAsync(async (req, res, next) => {
+  const { token } = req.params;
+
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationExpiresIn: { $gt: Date.now() },
+  });
+
+  if (!user)
+    return next(new AppError('Token is invalid or has expired !!', 401));
+
+  user.is_verified = true;
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpiresIn = undefined;
+  await user.save({
+    validateBeforeSave: false,
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'email verified successfully',
+  });
+});
+
+exports.protect = catchAsync(async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  const decoded = await promisify(jwt.verify)(
+    token,
+    process.env.JWT_TOKEN_SECRET
+  );
+
+  if (!token)
+    return next(
+      new AppError('You are not logged in!, please login to get Access', 401)
+    );
+
+  //find user with decoded id
+  const freshuser = await User.findById(decoded.id);
+  if (!freshuser)
+    return next(new AppError('The User with this ID does not exist', 401));
+
+  //check if user changed password after token was issued
+  if (freshuser.passwordChangedAfter(decoded.iat)) {
+    return next(
+      new AppError('User recently changed password! Please login again', 401)
+    );
+  }
+
+  req.user = freshuser;
+  next();
 });
