@@ -44,6 +44,8 @@ const corsOptions = {
     'http://coach-x.vercel.app',
     'https://coach-x.vercel.app',
     'https://coach-x-waitlist.vercel.app',
+    'https://coach-x.xyz',
+    'https://server.coach-x.xyz',
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
