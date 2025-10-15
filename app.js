@@ -6,6 +6,7 @@ const helmet = require('helmet');
 
 const cors = require('cors');
 const userRouter = require('./routes/userRoutes');
+const waitListRouter = require('./routes/waitListRoutes');
 const { globalErrorhandler } = require('./controllers/errorController');
 
 const app = express();
@@ -61,6 +62,7 @@ app.get('/', (req, res, next) => {
   });
 });
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/waitlist', waitListRouter);
 
 //global error handler
 app.use(globalErrorhandler);
