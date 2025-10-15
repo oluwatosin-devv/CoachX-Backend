@@ -56,4 +56,7 @@ module.exports = class Email {
   async sendPasswordResetEmail() {
     await this.sendEmail('resetPassword', 'Reset your Password');
   }
+  async sendwaitlistmail() {
+    await this.sendEmail('waitlist', `You're in. Welcome to CoachX.`);
+  }
 };

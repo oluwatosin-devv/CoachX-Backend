@@ -1,15 +1,18 @@
 const Waitlist = require('../models/waitlistModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const Email = require('../utils/email');
 
 exports.JoinWaitlist = catchAsync(async (req, res, next) => {
-  const { name, email } = req.body;
-  if (!name || !email) return next(new AppError('Provide name and email'));
+  const { fullName, email } = req.body;
+  if (!fullName || !email) return next(new AppError('Provide name and email'));
 
   const waitlistEntry = await Waitlist.create({
-    name,
+    fullName,
     email,
   });
+
+  await new Email(waitlistEntry).sendwaitlistmail();
 
   res.status(201).json({
     status: 'success',

@@ -3,7 +3,7 @@ const validator = require('validator');
 const { validate } = require('./userModel');
 
 const waitlistschema = new mongoose.Schema({
-  name: {
+  fullName: {
     type: String,
     required: [true, 'Waitlist must have a name'],
   },

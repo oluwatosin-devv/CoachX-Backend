@@ -1,0 +1,52 @@
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Welcome to CoachX
+  body(style="margin:0; padding:0; font-family:'Poppins', sans-serif; background-color:transparent; color:#5f5650;")
+    // Outer wrapper (transparent background)
+    table(width="100%", border="0", cellspacing="0", cellpadding="0", style="background-color:transparent; padding:40px 0;")
+      tr
+        td(align="center")
+          // Main email container
+          table(width="600", border="0", cellspacing="0", cellpadding="0", style="background-color:#ffffff; border:1px solid #eee; border-radius:12px; overflow:hidden; box-shadow:0 3px 12px rgba(0,0,0,0.05);")
+            // Header
+            tr
+              td(style="text-align:center; background-color:#fafafa; padding:25px;")
+                img(src="https://coach-x.vercel.app/coachX.png", alt="CoachX", style="width:120px; height:auto;")
+            // Body
+            tr
+              td(style="padding:35px 25px; text-align:center;")
+                h2(style="color:#333333; margin-bottom:15px; font-size:24px; font-weight:600;") You’re on the list 🎉
+                p(style="line-height:1.7; font-size:15px; margin-bottom:25px; color:#555;")
+                  | Hey
+                  strong  #{firstName}
+                  | , your email has been added to the CoachX waitlist.
+                  br
+                  | We’re thrilled to have you and can’t wait to show you what’s next.
+                  br
+                  | You’ll be the first to know when we go live.
+                a(href="https://www.coach-x.xyz/", target="_blank", style="background-color:#ff8a2b; color:#ffffff; text-decoration:none; padding:14px 28px; border-radius:6px; font-weight:bold; display:inline-block; margin-top:10px;") Visit CoachX
+            // Divider
+            tr
+              td(style="height:1px; background-color:#eee; padding:0; margin:0;")
+            // Footer
+            tr
+              td(style="text-align:center; padding:15px; font-size:13px; color:#888; background-color:#ffffff;")
+                | © 2025 CoachX. All rights reserved.
+    // Mobile responsiveness
+    style.
+      @media only screen and (max-width: 600px) {
+        body {
+          font-size: 14px !important;
+        }
+        table {
+          width: 90% !important;
+        }
+        h2 {
+          font-size: 20px !important;
+        }
+        p {
+          font-size: 14px !important;
+        }
+      }
