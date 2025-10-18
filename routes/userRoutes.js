@@ -6,6 +6,7 @@ const {
   resetPassword,
   verifyEmail,
   protect,
+  verified,
 } = require('../controllers/authController');
 const { updateMe, getUser } = require('../controllers/userController');
 
@@ -18,7 +19,7 @@ router.route('/resetpassword/:token').patch(resetPassword);
 router.route('/verifyemail/:token').patch(verifyEmail);
 
 router.use(protect);
-router.route('/updateme').patch(updateMe);
-router.route('/me').get(getUser);
+router.route('/updateme').patch(verified, updateMe);
+router.route('/me').get(verified, getUser);
 
 module.exports = router;

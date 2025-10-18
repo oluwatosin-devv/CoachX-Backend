@@ -184,3 +184,10 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = freshuser;
   next();
 });
+
+exports.verified = (req, res, next) => {
+  if (req.user.is_verified === false)
+    return next(new AppError('You must be verified to access this route', 401));
+
+  next();
+};
