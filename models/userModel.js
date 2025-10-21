@@ -78,6 +78,12 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.virtual('creator', {
+  ref: 'CreatorProfile',
+  foreignField: 'user',
+  localField: '_id',
+});
+
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 

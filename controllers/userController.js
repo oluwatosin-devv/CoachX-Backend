@@ -36,7 +36,14 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 });
 
 exports.getUser = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  let user;
+  if (req.user.role === 'creator') {
+    user = await User.findById(req.user.id).populate({
+      path: 'creator',
+    });
+  } else {
+    user = await User.findById(req.user.id);
+  }
 
   res.status(200).json({
     status: 'success',

@@ -6,6 +6,7 @@ const { promisify } = require('util');
 const crypto = require('crypto');
 const { use } = require('../app');
 const Email = require('../utils/email');
+const CreatorProfile = require('../models/creators_model');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_TOKEN_SECRET, {
@@ -21,6 +22,13 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
     role: req.body.role || 'user',
   });
+
+  //automatically create creator profile
+  if (req.body.role === 'creator') {
+    const newCreator = await CreatorProfile.create({
+      user: newUser.id,
+    });
+  }
 
   //create email verification token
   const emailVerificationToken = newUser.createEmailVerificationToken();
