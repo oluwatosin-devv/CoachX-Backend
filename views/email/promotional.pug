@@ -1,0 +1,46 @@
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title CoachX — The Next Chapter Is Taking Shape
+  body(style="margin:0; padding:0; font-family:'Poppins', sans-serif; background-color:#f8f8f8; color:#333333;")
+    table(width="100%", border="0", cellspacing="0", cellpadding="0", style="background-color:transparent; padding:40px 0;")
+      tr
+        td(align="center")
+          table(width="600", border="0", cellspacing="0", cellpadding="0", style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,0.05);")
+            // Header
+            tr
+              td(style="text-align:center; background-color:#fafafa; padding:25px;")
+                img(src="https://coach-x.vercel.app/coachX.png", alt="CoachX", style="width:120px; height:auto;")
+            // Body
+            tr
+              td(style="padding:40px 30px; text-align:center;")
+                h2(style="color:#111111; font-size:24px; font-weight:600; margin-bottom:15px;") The next chapter is taking shape.
+                p(style="line-height:1.7; font-size:15px; color:#555; margin-bottom:25px;")
+                  | Hey
+                  strong  #{firstName}
+                  | , we’re quietly shaping the future of fitness and community.  
+                  | Every line of code, every pixel, every idea — crafted with one mission:
+                  br
+                  br
+                  strong  To connect coaches and creators with people who believe in their journey.
+                  br
+                  br
+                  | CoachX isn’t just another app — it’s a movement built for those who don’t settle.  
+                  | The ones who show up, build, and inspire.
+                  br
+                  br
+                  | We’re not rushing. We’re refining.
+                  br
+                  | And soon, you’ll see what we’ve been building all along.
+                a(href="https://www.coach-x.xyz", target="_blank", style="background-color:#111111; color:#ffffff; text-decoration:none; padding:14px 32px; border-radius:6px; font-weight:600; display:inline-block; margin-top:15px; letter-spacing:0.3px;") Discover CoachX
+            // Footer
+            tr
+              td(style="text-align:center; padding:15px; font-size:13px; color:#888; background-color:#ffffff; border-top:1px solid #eee;")
+                | © 2025 CoachX. All rights reserved.
+    style.
+      @media only screen and (max-width:600px) {
+        table { width: 90% !important; }
+        h2 { font-size: 20px !important; }
+        p { font-size: 14px !important; }
+      }

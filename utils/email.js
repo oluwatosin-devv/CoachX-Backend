@@ -59,4 +59,8 @@ module.exports = class Email {
   async sendwaitlistmail() {
     await this.sendEmail('waitlist', `You're in. Welcome to CoachX.`);
   }
+
+  async sendpromotionalmail() {
+    await this.sendEmail('promotional', 'Big things are coming from CoachX');
+  }
 };
