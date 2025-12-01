@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const { use } = require('../app');
 const Email = require('../utils/email');
 const CreatorProfile = require('../models/creators_model');
+const OTP = require('../models/OTP');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_TOKEN_SECRET, {
@@ -40,7 +41,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   newUser.password = undefined;
 
   //send email
-  await new Email(newUser, url).sendWelcomeEmail();
+  await new Email(newUser).sendOtpmail();
 
   res.status(201).json({
     status: 'success',
@@ -199,3 +200,33 @@ exports.verified = (req, res, next) => {
 
   next();
 };
+
+exports.verifyOTP = catchAsync(async (req, res, next) => {
+  const { action } = req.query;
+  const user = req.body.user || req.user.id;
+  const { otp } = req.body;
+  console.log(user, otp);
+
+  if (!user || !otp)
+    return next(new AppError('Empty otp details not allowed', 400));
+
+  const userotprecords = await OTP.findOne({
+    user,
+    expiresAt: { $gt: Date.now() },
+  });
+
+  if (!userotprecords)
+    return next(new AppError('Code expired, please request again'));
+
+  if (!(await userotprecords.compareOTP(`${otp}`, userotprecords.otp)))
+    return next(new AppError('Invalid OTP'));
+
+  await OTP.deleteMany({ user });
+
+  await User.findByIdAndUpdate(user, { is_verified: true });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'User email verified successfully',
+  });
+});

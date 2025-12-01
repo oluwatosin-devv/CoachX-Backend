@@ -1,11 +1,15 @@
 const nodemailer = require('nodemailer');
+const OTP = require('../models/OTP');
+const bcrypt = require('bcrypt');
 const pug = require('pug');
 const htmlToText = require('html-to-text');
 const juice = require('juice');
 const { text } = require('express');
+const { verify } = require('jsonwebtoken');
 
 module.exports = class Email {
   constructor(user, url) {
+    this.user = user;
     this.to = user.email;
     this.firstName = user.fullName.split(' ')[0];
     this.url = url;
@@ -33,11 +37,12 @@ module.exports = class Email {
     });
   }
 
-  async sendEmail(template, subject) {
+  async sendEmail(template, subject, otp) {
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
       firstName: this.firstName,
       url: this.url,
       subject,
+      otp,
     });
     const mailOptions = {
       from: this.from,
@@ -62,5 +67,18 @@ module.exports = class Email {
 
   async sendpromotionalmail() {
     await this.sendEmail('promotional', 'Big things are coming from CoachX');
+  }
+  async sendOtpmail() {
+    //generate code.
+    const otp = `${Math.floor(100000 + Math.random() * 900000)}`;
+
+    //hashedotp
+    const hashedotp = await bcrypt.hash(otp, 12);
+    await OTP.create({
+      user: this.user.id,
+      otp: hashedotp,
+    });
+
+    await this.sendEmail('verifyemail', 'Welcome to CoachX Family', otp);
   }
 };

@@ -66,16 +66,23 @@ async function sendEmail(template, subject, firstName, to) {
 const sendBulkMail = async function () {
   const waitlist = await Waitlist.find();
 
-  waitlist.forEach(async (el) => {
-    const firstName = el.fullName.split(' ')[0];
+  // waitlist.forEach(async (el) => {
+  //   const firstName = el.fullName.split(' ')[0];
 
-    await sendEmail(
-      'promotional',
-      'The next chapter is taking shape.',
-      firstName,
-      el.email
-    );
-  });
+  //   await sendEmail(
+  //     'promotional',
+  //     'All hands on deck, CoachX is evolving.',
+  //     firstName,
+  //     el.email
+  //   );
+  // });
+
+  await sendEmail(
+    'promotional',
+    'All hands on deck — CoachX is evolving.',
+    'oluwatosin',
+    'oluwatosin.dev@gmail.com'
+  );
 };
 
 sendBulkMail();
