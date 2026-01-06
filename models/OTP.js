@@ -17,7 +17,7 @@ const OTPSchema = new mongoose.Schema({
   },
   expiresAt: {
     type: Date,
-    default: Date.now() + 10 * 60 * 1000,
+    default: () => Date.now() + 10 * 60 * 1000,
   },
 });
 
