@@ -62,12 +62,12 @@ const userSchema = new mongoose.Schema(
     emailVerificationToken: String,
     emailVerificationExpiresIn: Date,
 
-    is_active: {
+    isActive: {
       type: Boolean,
       default: true,
       select: false,
     },
-    is_verified: {
+    isVerified: {
       type: Boolean,
       default: false,
     },
