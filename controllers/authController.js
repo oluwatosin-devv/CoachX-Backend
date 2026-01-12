@@ -6,7 +6,6 @@ const { promisify } = require('util');
 const crypto = require('crypto');
 const { use } = require('../app');
 const Email = require('../utils/email');
-const CreatorProfile = require('../models/creators_model');
 const OTP = require('../models/OTP');
 
 const signToken = (id) => {
@@ -21,33 +20,30 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
-    role: req.body.role || 'user',
+    role: 'user',
   });
 
-  //automatically create creator profile
-  if (req.body.role === 'creator') {
-    const newCreator = await CreatorProfile.create({
-      user: newUser.id,
-    });
-  }
-
-  //create email verification token
-  const emailVerificationToken = newUser.createEmailVerificationToken();
   await newUser.save({ validateBeforeSave: false });
 
   const token = signToken(newUser.id);
-  const url = `https://coach-x.vercel.app/verify-email/${emailVerificationToken}`;
 
-  newUser.password = undefined;
-
-  //send email
-  await new Email(newUser).sendOtpmail();
+  try {
+    await new Email(newUser).sendOtpmail();
+  } catch (err) {
+    console.error('OTP email failed:', err);
+  }
 
   res.status(201).json({
     status: 'success',
     token,
     data: {
-      user: newUser,
+      user: {
+        id: newUser._id,
+        fullName: newUser.fullName,
+        email: newUser.email,
+        role: newUser.role,
+        isVerified: newUser.isVerified,
+      },
     },
   });
 });
@@ -55,18 +51,19 @@ exports.signup = catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
-  //1) check if email and password exist
   if (!email || !password) {
     return next(new AppError('Provide email and password', 400));
   }
 
-  //2) check if user still exist and password is correct
   const user = await User.findOne({
     email,
   }).select('+password');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
+  }
+  if (!user.isActive) {
+    return next(new AppError('Account inactive, contact support', 401));
   }
 
   const token = signToken(user.id);
@@ -112,7 +109,6 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   if (!user)
     return next(new AppError('Token is invalid or has expired !!', 401));
 
-  //Make sure password is not same as old password
 
   if (await user.correctPassword(password, user.password))
     return next(
@@ -147,7 +143,7 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
   if (!user)
     return next(new AppError('Token is invalid or has expired !!', 401));
 
-  user.is_verified = true;
+  user.isVerified = true;
   user.emailVerificationToken = undefined;
   user.emailVerificationExpiresIn = undefined;
   await user.save({
@@ -178,12 +174,10 @@ exports.protect = catchAsync(async (req, res, next) => {
       new AppError('You are not logged in!, please login to get Access', 401)
     );
 
-  //find user with decoded id
   const freshuser = await User.findById(decoded.id);
   if (!freshuser)
     return next(new AppError('The User with this ID does not exist', 401));
 
-  //check if user changed password after token was issued
   if (freshuser.passwordChangedAfter(decoded.iat)) {
     return next(
       new AppError('User recently changed password! Please login again', 401)
@@ -195,7 +189,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 
 exports.verified = (req, res, next) => {
-  if (req.user.is_verified === false)
+  if (req.user.isVerified === false)
     return next(new AppError('You must be verified to access this route', 401));
 
   next();
@@ -223,7 +217,7 @@ exports.verifyOTP = catchAsync(async (req, res, next) => {
 
   await OTP.deleteMany({ user });
 
-  await User.findByIdAndUpdate(user, { is_verified: true });
+  await User.findByIdAndUpdate(user, { isVerified: true });
 
   res.status(200).json({
     status: 'success',

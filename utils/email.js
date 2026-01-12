@@ -4,8 +4,6 @@ const bcrypt = require('bcrypt');
 const pug = require('pug');
 const htmlToText = require('html-to-text');
 const juice = require('juice');
-const { text } = require('express');
-const { verify } = require('jsonwebtoken');
 
 module.exports = class Email {
   constructor(user, url) {
@@ -52,7 +50,11 @@ module.exports = class Email {
       text: htmlToText.convert(html),
     };
 
-    await this.newTransporter().sendMail(mailOptions);
+    const info = await this.newTransporter().sendMail(mailOptions);
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
+    }
   }
 
   async sendWelcomeEmail() {
@@ -69,15 +71,15 @@ module.exports = class Email {
     await this.sendEmail('promotional', 'Big things are coming from CoachX');
   }
   async sendOtpmail() {
-    //generate code.
     const otp = `${Math.floor(100000 + Math.random() * 900000)}`;
 
-    //hashedotp
     const hashedotp = await bcrypt.hash(otp, 12);
     await OTP.create({
-      user: this.user.id,
+      user: this.user._id,
       otp: hashedotp,
     });
+
+    console.log('Generated OTP:', otp);
 
     await this.sendEmail('verifyemail', 'Welcome to CoachX Family', otp);
   }
