@@ -1,12 +1,18 @@
 const CreatorProfile = require('../models/creators_model');
 const catchAsync = require('../utils/catchAsync');
 
-exports.getAllCreator = catchAsync(async (req, res, next) => {
-  const creators = await CreatorProfile.find();
-
-  res.status(200).json({
-    status: 'success',
-    length: creators.length,
-    creators,
-  });
+exports.createProfile = catchAsync(async (req, res, next) => {
+  
+});
+exports.updateProfile = catchAsync(async (req, res, next) => {
+  
+});
+exports.getProfile = catchAsync(async (req, res, next) => {
+  
+});
+exports.deleteProfile = catchAsync(async (req, res, next) => {
+  
+});
+exports.verifyProfile = catchAsync(async (req, res, next) => {
+  
 });

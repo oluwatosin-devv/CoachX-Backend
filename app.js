@@ -66,8 +66,8 @@ app.get('/', (req, res, next) => {
   });
 });
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/waitlist', waitListRouter);
 app.use('/api/v1/creators', creatorRouter);
+app.use('/api/v1/waitlist', waitListRouter);
 
 //global error handler
 app.use(globalErrorhandler);
