@@ -6,6 +6,7 @@ const creatorProfileSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: 'User',
       required: [true, 'Creator profile must belong to a user'],
+      unique: true,
     },
     displayName: {
       type: String,
@@ -16,11 +17,12 @@ const creatorProfileSchema = new mongoose.Schema(
     specialization: {
       type: [String],
       required: [true, 'At least one specialization is required'],
+      enum: ['fitness', 'nutrition', 'mindfulness', 'coaching', 'sports', 'wellness'],
     },
     subscriptionPrice: {
       type: Number,
       required: [true, 'Subscription price is required'],
-      min: 0,
+      min: [0.01, 'Subscription price must be greater than 0'],
     },
     subscriptionCurrency: {
       type: String,
@@ -59,6 +61,7 @@ const creatorProfileSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    deactivatedAt: Date,
     createdAt: {
       type: Date,
       default: Date.now,

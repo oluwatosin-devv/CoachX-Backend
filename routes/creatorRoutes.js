@@ -6,6 +6,8 @@ const {
   getProfile,
   verifyProfile,
   getProfiles,
+  deactivateProfile,
+  reactivateProfile,
 } = require('../controllers/creatorController');
 const {
   protect,
@@ -24,9 +26,12 @@ router.get('/me', protect, getProfile);
 router.patch('/me', protect, updateProfile);
 router.delete('/me', protect, deleteProfile);
 
+router.post('/:creatorId/deactivate', protect, deactivateProfile);
+router.post('/:creatorId/reactivate', protect, reactivateProfile);
+router.delete('/:creatorId', protect, restrictTo('admin'), deleteProfile);
+
 router.get('/:id', protect, verified, getProfile);
 
-// THis fort he admin
 router.patch('/:creatorId/verify', protect, restrictTo('admin'), verifyProfile);
 
 module.exports = router;
