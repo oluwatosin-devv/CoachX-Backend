@@ -57,7 +57,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({
     email,
-  }).select('+password');
+  }).select('+password +isActive');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
@@ -88,6 +88,8 @@ exports.forgotpassword = catchAsync(async (req, res, next) => {
 
   await new Email(user, url).sendPasswordResetEmail();
 
+  console.log(resetToken);
+
   res.status(200).json({
     status: 'success',
     message: 'Token sent to mail',
@@ -108,7 +110,6 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   if (!user)
     return next(new AppError('Token is invalid or has expired !!', 401));
-
 
   if (await user.correctPassword(password, user.password))
     return next(
@@ -229,10 +230,7 @@ exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
-        new AppError(
-          'You do not have permission to perform this action',
-          403
-        )
+        new AppError('You do not have permission to perform this action', 403)
       );
     }
     next();

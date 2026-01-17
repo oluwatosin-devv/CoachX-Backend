@@ -224,6 +224,13 @@ exports.getProfiles = catchAsync(async (req, res, next) => {
       user: { $ne: null },
     };
 
+    const requester = req.user;
+    const isAdmin = requester && requester.role === 'admin';
+
+    if (!isAdmin) {
+      filter.isActive = true;
+    }
+
     if (req.query.specialization) {
       const specs = String(req.query.specialization)
         .split(',')
@@ -260,9 +267,6 @@ exports.getProfiles = catchAsync(async (req, res, next) => {
       if (allowed.includes(field)) sort = req.query.sort;
     }
 
-    const requester = req.user;
-    const isAdmin = requester && requester.role === 'admin';
-
     const query = CreatorProfile.find(filter)
       .sort(sort)
       .skip(skip)
@@ -294,5 +298,110 @@ exports.getProfiles = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.deleteProfile = catchAsync(async (req, res, next) => {});
-exports.verifyProfile = catchAsync(async (req, res, next) => {});
+exports.deleteProfile = catchAsync(async (req, res, next) => {
+  const { creatorId } = req.params;
+  const requester = req.user;
+
+  if (requester.role !== 'admin') {
+    return next(new AppError('Only admin can permanently delete profiles', 403));
+  }
+
+  const profile = await CreatorProfile.findById(creatorId);
+  if (!profile) {
+    return next(new AppError('Creator profile not found', 404));
+  }
+
+  await CreatorProfile.findByIdAndDelete(creatorId);
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
+exports.deactivateProfile = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const { creatorId } = req.params;
+  const requester = req.user;
+
+  const profile = await CreatorProfile.findById(creatorId);
+  if (!profile) {
+    return next(new AppError('Creator profile not found', 404));
+  }
+
+  const isOwner = String(profile.user) === String(userId);
+  const isAdmin = requester.role === 'admin';
+
+  if (!isOwner && !isAdmin) {
+    return next(
+      new AppError('You are not allowed to deactivate this profile', 403)
+    );
+  }
+
+  profile.isActive = false;
+  profile.deactivatedAt = new Date();
+  await profile.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      creatorProfile: profile,
+    },
+  });
+});
+
+exports.reactivateProfile = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const { creatorId } = req.params;
+  const requester = req.user;
+
+  const profile = await CreatorProfile.findById(creatorId);
+  if (!profile) {
+    return next(new AppError('Creator profile not found', 404));
+  }
+
+  const isOwner = String(profile.user) === String(userId);
+  const isAdmin = requester.role === 'admin';
+
+  if (!isOwner && !isAdmin) {
+    return next(
+      new AppError('You are not allowed to reactivate this profile', 403)
+    );
+  }
+
+  profile.isActive = true;
+  profile.deactivatedAt = null;
+  await profile.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      creatorProfile: profile,
+    },
+  });
+});
+
+exports.verifyProfile = catchAsync(async (req, res, next) => {
+  const { creatorId } = req.params;
+  const requester = req.user;
+
+  if (requester.role !== 'admin') {
+    return next(new AppError('Only admin can verify profiles', 403));
+  }
+
+  const profile = await CreatorProfile.findById(creatorId);
+  if (!profile) {
+    return next(new AppError('Creator profile not found', 404));
+  }
+
+  profile.isVerified = true;
+  profile.verifiedAt = new Date();
+  await profile.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      creatorProfile: profile,
+    },
+  });
+});
