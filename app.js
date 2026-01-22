@@ -13,7 +13,6 @@ const { globalErrorhandler } = require("./controllers/errorController");
 
 // Swagger
 const swaggerUi = require("swagger-ui-express");
-const swaggerUiDist = require("swagger-ui-dist");
 const swaggerSpec = require("./docs/swagger");
 
 const app = express();
@@ -66,16 +65,28 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 
 /* ---------------------- Swagger Documentation ---------------------- */
-// 1) Serve Swagger static assets (CSS/JS) explicitly (fixes Vercel 404)
-app.use("/api-docs", express.static(swaggerUiDist.getAbsoluteFSPath()));
+// Serve Swagger assets (CSS/JS)
+app.use("/api-docs", swaggerUi.serve);
 
-// 2) Serve Swagger UI page
-app.get("/api-docs", swaggerUi.setup(swaggerSpec, { explorer: true }));
+// Serve Swagger UI page
+app.get(
+  "/api-docs",
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      url: "/api-docs.json",
+    },
+  })
+);
 
-// 3) Expose raw JSON spec
+// Raw JSON spec
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.status(200).json(swaggerSpec);
+});
+
+// CSS fallback (some environments don’t expose swagger-ui.css)
+app.get("/api-docs/swagger-ui.css", (req, res) => {
+  res.redirect("/api-docs/swagger-ui.min.css");
 });
 /* ------------------------------------------------------------------ */
 
