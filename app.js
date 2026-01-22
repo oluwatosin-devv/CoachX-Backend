@@ -28,18 +28,21 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Security Headers
-app.use(
-  helmet({
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api-docs")) return next();
+
+  return helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        connectSrc: ["'self'", 'ws://127.0.0.1:*'],
-        scriptSrc: ["'self'", 'https://js.paystack.co'],
-        frameSrc: ["'self'", 'https://checkout.paystack.com'],
+        connectSrc: ["'self'", "ws://127.0.0.1:*"],
+        scriptSrc: ["'self'", "https://js.paystack.co"],
+        frameSrc: ["'self'", "https://checkout.paystack.com"],
       },
     },
-  })
-);
+  })(req, res, next);
+});
+
 
 // CORS
 const corsOptions = {
@@ -63,7 +66,9 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 /* ---------------------- Swagger Documentation ---------------------- */
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Swagger (Vercel-safe)
+app.use("/api-docs", swaggerUi.serve);
+app.get("/api-docs", swaggerUi.setup(swaggerSpec));
 
 app.get('/api-docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
