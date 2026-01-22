@@ -11,8 +11,7 @@ const waitListRouter = require("./routes/waitListRoutes");
 const creatorRouter = require("./routes/creatorRoutes");
 const { globalErrorhandler } = require("./controllers/errorController");
 
-// Swagger
-const swaggerUi = require("swagger-ui-express");
+// Swagger spec (your swagger-jsdoc output)
 const swaggerSpec = require("./docs/swagger");
 
 const app = express();
@@ -65,28 +64,44 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 
 /* ---------------------- Swagger Documentation ---------------------- */
-// Serve Swagger assets (CSS/JS)
-app.use("/api-docs", swaggerUi.serve);
-
-// Serve Swagger UI page
-app.get(
-  "/api-docs",
-  swaggerUi.setup(swaggerSpec, {
-    swaggerOptions: {
-      url: "/api-docs.json",
-    },
-  })
-);
-
 // Raw JSON spec
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.status(200).json(swaggerSpec);
 });
 
-// CSS fallback (some environments don’t expose swagger-ui.css)
-app.get("/api-docs/swagger-ui.css", (req, res) => {
-  res.redirect("/api-docs/swagger-ui.min.css");
+// Swagger UI (CDN assets - Vercel safe)
+app.get("/api-docs", (req, res) => {
+  res.setHeader("Content-Type", "text/html");
+  res.send(`
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>CoachX API Docs</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+    <style>
+      body { margin: 0; padding: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+    <script>
+      window.onload = () => {
+        window.ui = SwaggerUIBundle({
+          url: "/api-docs.json",
+          dom_id: "#swagger-ui",
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+          layout: "BaseLayout"
+        });
+      };
+    </script>
+  </body>
+</html>
+  `);
 });
 /* ------------------------------------------------------------------ */
 
