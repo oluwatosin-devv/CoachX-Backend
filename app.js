@@ -3,42 +3,45 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const helmet = require('helmet');
-
 const cors = require('cors');
+
+// Routers
 const userRouter = require('./routes/userRoutes');
 const waitListRouter = require('./routes/waitListRoutes');
 const creatorRouter = require('./routes/creatorRoutes');
 const { globalErrorhandler } = require('./controllers/errorController');
 
+// Swagger
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./docs/swagger');
+
 const app = express();
 
+// View Engine
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-//development logging
+// Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-//set security
+// Security Headers
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        connectSrc: ["'self'", 'ws://127.0.0.1:*'], //
+        connectSrc: ["'self'", 'ws://127.0.0.1:*'],
         scriptSrc: ["'self'", 'https://js.paystack.co'],
-        frameSrc: [
-          "'self'",
-          'https://checkout.paystack.com', //
-        ],
+        frameSrc: ["'self'", 'https://checkout.paystack.com'],
       },
     },
   })
 );
 
-//CORS
+// CORS
 const corsOptions = {
   origin: [
     'http://localhost:5173',
@@ -53,22 +56,35 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
-//Body Parsers
+
+// Body Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
-//routes
-app.get('/', (req, res, next) => {
+/* ---------------------- Swagger Documentation ---------------------- */
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).json(swaggerSpec);
+});
+/* ------------------------------------------------------------------ */
+
+// Base Endpoint
+app.get('/', (req, res) => {
   res.status(200).json({
     status: 'success',
     message: 'Server is currently running....',
   });
 });
+
+// API Routes
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/creators', creatorRouter);
 app.use('/api/v1/waitlist', waitListRouter);
 
-//global error handler
+// Global Error Handler
 app.use(globalErrorhandler);
+
 module.exports = app;
