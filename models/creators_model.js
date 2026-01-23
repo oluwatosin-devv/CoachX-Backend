@@ -17,7 +17,15 @@ const creatorProfileSchema = new mongoose.Schema(
     specialization: {
       type: [String],
       required: [true, 'At least one specialization is required'],
-      enum: ['fitness', 'nutrition', 'mindfulness', 'coaching', 'sports', 'wellness'],
+      set: (arr) => arr.map((s) => String(s).toLowerCase().trim()),
+      enum: [
+        'fitness',
+        'nutrition',
+        'mindfulness',
+        'coaching',
+        'sports',
+        'wellness',
+      ],
     },
     subscriptionPrice: {
       type: Number,
@@ -70,7 +78,7 @@ const creatorProfileSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 creatorProfileSchema.pre(/^find/, function (next) {

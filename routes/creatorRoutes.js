@@ -90,7 +90,7 @@ const router = express.Router();
  *         schema:
  *           type: string
  *         description: Comma-separated specialization filter (e.g. "yoga,strength")
- *         example: "yoga,strength"
+ *         example: "fitness,nutrition"
  *       - in: query
  *         name: isVerified
  *         schema:
