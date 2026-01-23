@@ -188,10 +188,6 @@ router.route("/verifyemail/:token").patch(verifyEmail);
  *               otp:
  *                 type: string
  *                 example: "123456"
- *               user:
- *                 type: string
- *                 description: Optional. If omitted, it uses logged-in user id.
- *                 example: "65f1c2a9c1a2b3c4d5e6f789"
  *     responses:
  *       200:
  *         description: User email verified successfully
