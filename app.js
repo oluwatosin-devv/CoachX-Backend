@@ -11,12 +11,10 @@ const waitListRouter = require("./routes/waitListRoutes");
 const creatorRouter = require("./routes/creatorRoutes");
 const { globalErrorhandler } = require("./controllers/errorController");
 
-// Swagger spec (your swagger-jsdoc output)
 const swaggerSpec = require("./docs/swagger");
 
 const app = express();
 
-// View Engine
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
