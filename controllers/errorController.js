@@ -31,16 +31,27 @@ const sendErrorProd = (err, req, res) => {
 };
 
 exports.globalErrorhandler = (err, req, res, next) => {
+  console.error('ERROR 💥', {
+    message: err.message,
+    name: err.name,
+    code: err.code,
+    stack: err.stack,
+  });
+
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
-    let error = Object.create(err);
+    let error = { ...err };
+
+    error.message = err.message;
 
     if (error.code === 11000) error = handleDuplicateFieldDB(error);
 
     sendErrorProd(error, req, res);
   }
+
+  return sendErrorProd(err, req, res);
 };

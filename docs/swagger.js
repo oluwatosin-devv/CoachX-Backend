@@ -15,6 +15,7 @@ const swaggerDefinition = {
   servers: [
     { url: 'http://localhost:3000', description: 'Local' },
     { url: 'https://server.coach-x.xyz', description: 'Production' },
+    { url: 'https://coachx-backend.vercel.app', description: 'Vercel' },
   ],
   components: {
     securitySchemes: {
