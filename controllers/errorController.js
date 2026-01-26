@@ -14,50 +14,24 @@ const sendErrorDev = (err, req, res) => {
   });
 };
 
-// const sendErrorProd = (err, req, res) => {
-//   if (err.isOperational) {
-//     res.status(err.statusCode).json({
-//       status: err.status,
-//       message: err.message,
-//     });
-//   }
-
-//   //unknown errors
-//   res.status(500).json({
-//     status: 'error',
-//     message: 'something went very wrong',
-//   });
-//   console.log('ERROR ❌❌', err);
-// };
-
 const sendErrorProd = (err, req, res) => {
-  const wantsDebug = req.headers['x-debug-error'] === '1';
-
   if (err.isOperational) {
-    return res.status(err.statusCode).json({
+    res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
     });
   }
 
-  if (wantsDebug) {
-    return res.status(err.statusCode || 500).json({
-      status: 'error',
-      message: err.message,
-      name: err.name,
-      code: err.code,
-      stack: err.stack,
-    });
-  }
-
-  return res.status(500).json({
+  //unknown errors
+  res.status(500).json({
     status: 'error',
     message: 'something went very wrong',
   });
+  console.log('ERROR', err);
 };
 
 exports.globalErrorhandler = (err, req, res, next) => {
-  console.error('ERROR 💥', {
+  console.error('ERROR', {
     message: err.message,
     name: err.name,
     code: err.code,
@@ -67,29 +41,16 @@ exports.globalErrorhandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
-  // if (process.env.NODE_ENV === 'development') {
-  //   sendErrorDev(err, req, res);
-  // } else if (process.env.NODE_ENV === 'production') {
-  //   let error = { ...err };
-
-  //   error.message = err.message;
-
-  //   if (error.code === 11000) error = handleDuplicateFieldDB(error);
-
-  //   sendErrorProd(error, req, res);
-  // }
-
-  // return sendErrorProd(err, req, res);
-
   if (process.env.NODE_ENV === 'development') {
-    return sendErrorDev(err, req, res);
-  }
-
-  if (process.env.NODE_ENV === 'production') {
+    sendErrorDev(err, req, res);
+  } else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };
+
     error.message = err.message;
+
     if (error.code === 11000) error = handleDuplicateFieldDB(error);
-    return sendErrorProd(error, req, res);
+
+    sendErrorProd(error, req, res);
   }
 
   return sendErrorProd(err, req, res);
